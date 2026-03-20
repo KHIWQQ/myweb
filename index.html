@@ -16,11 +16,13 @@
             background-size: 400% 400%;
             animation: gradientShift 12s ease infinite;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             padding: 20px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         @keyframes gradientShift {
@@ -34,8 +36,11 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             pointer-events: none;
+            touch-action: none;
             overflow: hidden;
             z-index: 0;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .float-icon {
@@ -105,8 +110,10 @@
             transition: transform 0.3s ease;
         }
 
-        .card:hover {
-            transform: translateY(-4px);
+        @media (hover: hover) {
+            .card:hover {
+                transform: translateY(-4px);
+            }
         }
 
         /* Gender selector */
@@ -527,11 +534,62 @@
         }
 
         /* Responsive */
-        @media (max-width: 480px) {
-            .card { padding: 28px 20px; border-radius: 22px; }
-            .header h1 { font-size: 1.5rem; }
+        @media (max-width: 600px) {
+            body {
+                padding: 16px 12px;
+                align-items: flex-start;
+            }
+            .container {
+                max-width: 100%;
+            }
+            .card {
+                padding: 24px 18px;
+                border-radius: 20px;
+            }
+            .header h1 { font-size: 1.4rem; }
+            .header .logo { font-size: 2.8rem; }
             .bmi-number { font-size: 3rem; }
             .info-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .info-card { padding: 10px; }
+            .info-card .info-value { font-size: 0.95rem; }
+            .gender-btn { padding: 12px; }
+            .gender-btn .icon { font-size: 1.8rem; }
+            .input-wrapper input {
+                padding: 14px 16px;
+                padding-right: 55px;
+                font-size: 1.1rem;
+            }
+            .calc-btn { padding: 16px; font-size: 1.1rem; }
+            .bmi-table-row { padding: 9px 14px; font-size: 0.8rem; }
+            .health-tip { font-size: 0.82rem; padding: 12px 14px; }
+        }
+
+        @media (max-width: 360px) {
+            .card { padding: 20px 14px; }
+            .gender-selector { gap: 8px; }
+            .gender-btn .icon { font-size: 1.5rem; }
+            .gender-btn .label { font-size: 0.8rem; }
+            .input-group label { font-size: 0.85rem; }
+            .bmi-number { font-size: 2.5rem; }
+            .info-cards { grid-template-columns: 1fr 1fr; gap: 6px; }
+        }
+
+        /* Desktop large screens */
+        @media (min-width: 768px) {
+            body {
+                align-items: center;
+                padding: 40px 20px;
+            }
+        }
+
+        /* Fix iOS Safari bounce & scroll */
+        html {
+            height: -webkit-fill-available;
+            overflow-y: auto;
+        }
+
+        body {
+            min-height: -webkit-fill-available;
         }
     </style>
 </head>
