@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator - รักสุขภาพ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a7a5a 25%, #2ecc71 50%, #a8e6cf 75%, #dcedc1 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 12s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating health icons */
+        .floating-icons {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .float-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.15;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header .logo {
+            font-size: 3.5rem;
+            margin-bottom: 8px;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 4px 12px rgba(46, 204, 113, 0.4));
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.85);
+            font-size: 0.95rem;
+            font-weight: 300;
+            margin-top: 4px;
+        }
+
+        /* Card */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 36px 32px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255,255,255,0.3) inset,
+                0 0 80px rgba(46, 204, 113, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Gender selector */
+        .gender-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .gender-btn {
+            flex: 1;
+            padding: 16px;
+            border: 2.5px solid #e0e0e0;
+            border-radius: 18px;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .gender-btn:hover {
+            border-color: #2ecc71;
+            background: #f0faf4;
+        }
+
+        .gender-btn.active {
+            border-color: #2ecc71;
+            background: linear-gradient(135deg, #e8fdf0, #d4f5e2);
+            box-shadow: 0 4px 16px rgba(46, 204, 113, 0.2);
+        }
+
+        .gender-btn .icon {
+            font-size: 2.2rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .gender-btn .label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .gender-btn.active .label {
+            color: #1a7a5a;
+            font-weight: 600;
+        }
+
+        /* Input groups */
+        .input-group {
+            margin-bottom: 22px;
+        }
+
+        .input-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        .input-group label .icon {
+            font-size: 1.2rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 16px 20px;
+            padding-right: 60px;
+            border: 2.5px solid #e8e8e8;
+            border-radius: 16px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #333;
+            background: #fafafa;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper input:focus {
+            border-color: #2ecc71;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.12);
+        }
+
+        .input-wrapper input::placeholder {
+            color: #bbb;
+            font-weight: 300;
+        }
+
+        .input-wrapper .unit {
+            position: absolute;
+            right: 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #999;
+        }
+
+        /* Slider */
+        .slider-container {
+            margin-top: 8px;
+        }
+
+        .slider-container input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #a8e6cf, #2ecc71, #1a7a5a);
+            outline: none;
+            transition: opacity 0.2s;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #2ecc71;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #2ecc71;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Calculate button */
+        .calc-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #2ecc71, #1a9b5a);
+            color: #fff;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calc-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .calc-btn:hover::before {
+            left: 100%;
+        }
+
+        .calc-btn:hover {
+            background: linear-gradient(135deg, #27ae60, #15814a);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(46, 204, 113, 0.4);
+        }
+
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Result section */
+        .result-section {
+            margin-top: 28px;
+            display: none;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #2ecc71, transparent);
+            margin-bottom: 28px;
+            border-radius: 1px;
+        }
+
+        .bmi-display {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .bmi-number {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #2ecc71, #1a7a5a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: countUp 0.8s ease;
+        }
+
+        .bmi-label {
+            font-size: 0.9rem;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .bmi-status {
+            text-align: center;
+            padding: 16px 24px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .bmi-status .status-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        /* BMI gauge */
+        .gauge-container {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .gauge-bar {
+            height: 14px;
+            border-radius: 7px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #f1c40f, #e67e22, #e74c3c);
+            position: relative;
+            overflow: visible;
+        }
+
+        .gauge-pointer {
+            position: absolute;
+            top: -6px;
+            width: 26px;
+            height: 26px;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .gauge-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: #999;
+        }
+
+        /* Info cards */
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .info-card {
+            padding: 14px;
+            border-radius: 14px;
+            background: #f8f9fa;
+            text-align: center;
+            border: 1.5px solid #eee;
+        }
+
+        .info-card .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-card .info-label {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        /* BMI table */
+        .bmi-table {
+            margin-top: 20px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1.5px solid #eee;
+        }
+
+        .bmi-table-title {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #f0faf4, #e8fdf0);
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1a7a5a;
+            text-align: center;
+        }
+
+        .bmi-table-row {
+            display: flex;
+            padding: 10px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .bmi-table-row:last-child {
+            border-bottom: none;
+        }
+
+        .bmi-table-row:hover {
+            background: #fafafa;
+        }
+
+        .bmi-table-row.active-row {
+            background: #f0faf4;
+            font-weight: 600;
+        }
+
+        .bmi-table-row .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .bmi-table-row .range {
+            flex: 1;
+            color: #666;
+        }
+
+        .bmi-table-row .category {
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* Reset button */
+        .reset-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 14px;
+            background: transparent;
+            color: #999;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 16px;
+        }
+
+        .reset-btn:hover {
+            border-color: #e74c3c;
+            color: #e74c3c;
+            background: #fff5f5;
+        }
+
+        /* Tip */
+        .health-tip {
+            margin-top: 16px;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, #f0faf4, #e8fdf0);
+            border-radius: 14px;
+            border-left: 4px solid #2ecc71;
+            font-size: 0.85rem;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .health-tip .tip-title {
+            font-weight: 600;
+            color: #1a7a5a;
+            margin-bottom: 4px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+            font-weight: 300;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .card { padding: 28px 20px; border-radius: 22px; }
+            .header h1 { font-size: 1.5rem; }
+            .bmi-number { font-size: 3rem; }
+            .info-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="floating-icons" id="floatingIcons"></div>
+
+<div class="container">
+    <div class="header">
+        <div class="logo">💚</div>
+        <h1>คำนวณค่า BMI</h1>
+        <p>ดูแลสุขภาพ เริ่มต้นที่การรู้จักตัวเอง</p>
+    </div>
+
+    <div class="card">
+        <!-- Gender -->
+        <div class="gender-selector">
+            <div class="gender-btn active" onclick="selectGender(this, 'male')">
+                <span class="icon">🙋‍♂️</span>
+                <span class="label">ชาย</span>
+            </div>
+            <div class="gender-btn" onclick="selectGender(this, 'female')">
+                <span class="icon">🙋‍♀️</span>
+                <span class="label">หญิง</span>
+            </div>
+        </div>
+
+        <!-- Age -->
+        <div class="input-group">
+            <label><span class="icon">🎂</span> อายุ</label>
+            <div class="input-wrapper">
+                <input type="number" id="age" placeholder="25" min="1" max="120" value="">
+                <span class="unit">ปี</span>
+            </div>
+            <div class="slider-container">
+                <input type="range" id="ageSlider" min="1" max="100" value="25"
+                    oninput="document.getElementById('age').value=this.value">
+            </div>
+        </div>
+
+        <!-- Height -->
+        <div class="input-group">
+            <label><span class="icon">📏</span> ส่วนสูง</label>
+            <div class="input-wrapper">
+                <input type="number" id="height" placeholder="170" min="50" max="250" value="">
+                <span class="unit">ซม.</span>
+            </div>
+            <div class="slider-container">
+                <input type="range" id="heightSlider" min="100" max="220" value="170"
+                    oninput="document.getElementById('height').value=this.value">
+            </div>
+        </div>
+
+        <!-- Weight -->
+        <div class="input-group">
+            <label><span class="icon">⚖️</span> น้ำหนัก</label>
+            <div class="input-wrapper">
+                <input type="number" id="weight" placeholder="65" min="10" max="300" step="0.1" value="">
+                <span class="unit">กก.</span>
+            </div>
+            <div class="slider-container">
+                <input type="range" id="weightSlider" min="30" max="200" value="65"
+                    oninput="document.getElementById('weight').value=this.value">
+            </div>
+        </div>
+
+        <button class="calc-btn" onclick="calculateBMI()">
+            🩺 คำนวณ BMI
+        </button>
+
+        <!-- Result -->
+        <div class="result-section" id="resultSection">
+            <div class="divider"></div>
+
+            <div class="bmi-display">
+                <div class="bmi-number" id="bmiNumber">-</div>
+                <div class="bmi-label">ค่าดัชนีมวลกาย (BMI)</div>
+            </div>
+
+            <div class="bmi-status" id="bmiStatus"></div>
+
+            <!-- Gauge -->
+            <div class="gauge-container">
+                <div class="gauge-bar">
+                    <div class="gauge-pointer" id="gaugePointer" style="left: 0%"></div>
+                </div>
+                <div class="gauge-labels">
+                    <span>ผอม</span>
+                    <span>ปกติ</span>
+                    <span>ท้วม</span>
+                    <span>อ้วน</span>
+                    <span>อ้วนมาก</span>
+                </div>
+            </div>
+
+            <!-- Info cards -->
+            <div class="info-cards">
+                <div class="info-card">
+                    <div class="info-value" id="idealWeight">-</div>
+                    <div class="info-label">น้ำหนักที่เหมาะสม</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-value" id="weightDiff">-</div>
+                    <div class="info-label">ส่วนต่าง</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-value" id="bmrValue">-</div>
+                    <div class="info-label">BMR (แคล/วัน)</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-value" id="waterIntake">-</div>
+                    <div class="info-label">น้ำที่ควรดื่ม/วัน</div>
+                </div>
+            </div>
+
+            <!-- BMI Table -->
+            <div class="bmi-table">
+                <div class="bmi-table-title">📊 เกณฑ์ค่า BMI (เกณฑ์เอเชีย)</div>
+                <div class="bmi-table-row" data-cat="underweight">
+                    <div class="dot" style="background:#3498db"></div>
+                    <span class="category">น้ำหนักน้อย</span>
+                    <span class="range">ต่ำกว่า 18.5</span>
+                </div>
+                <div class="bmi-table-row" data-cat="normal">
+                    <div class="dot" style="background:#2ecc71"></div>
+                    <span class="category">ปกติ (สมส่วน)</span>
+                    <span class="range">18.5 – 22.9</span>
+                </div>
+                <div class="bmi-table-row" data-cat="overweight">
+                    <div class="dot" style="background:#f1c40f"></div>
+                    <span class="category">น้ำหนักเกิน</span>
+                    <span class="range">23.0 – 24.9</span>
+                </div>
+                <div class="bmi-table-row" data-cat="obese1">
+                    <div class="dot" style="background:#e67e22"></div>
+                    <span class="category">อ้วนระดับ 1</span>
+                    <span class="range">25.0 – 29.9</span>
+                </div>
+                <div class="bmi-table-row" data-cat="obese2">
+                    <div class="dot" style="background:#e74c3c"></div>
+                    <span class="category">อ้วนระดับ 2</span>
+                    <span class="range">30.0 ขึ้นไป</span>
+                </div>
+            </div>
+
+            <!-- Health tip -->
+            <div class="health-tip" id="healthTip"></div>
+
+            <button class="reset-btn" onclick="resetForm()">🔄 คำนวณใหม่</button>
+        </div>
+    </div>
+
+    <div class="footer">💚 รักสุขภาพ เริ่มต้นวันนี้</div>
+</div>
+
+<script>
+    // Floating icons
+    const icons = ['🥗', '🏃', '💪', '🧘', '🥦', '🍎', '❤️', '🫀', '🥕', '🍋', '🏋️', '🚴', '🧡', '🌿', '💧', '🍇'];
+    const container = document.getElementById('floatingIcons');
+    for (let i = 0; i < 20; i++) {
+        const el = document.createElement('div');
+        el.className = 'float-icon';
+        el.textContent = icons[Math.floor(Math.random() * icons.length)];
+        el.style.left = Math.random() * 100 + '%';
+        el.style.fontSize = (1.2 + Math.random() * 1.8) + 'rem';
+        el.style.animationDuration = (8 + Math.random() * 12) + 's';
+        el.style.animationDelay = Math.random() * 10 + 's';
+        container.appendChild(el);
+    }
+
+    // Sync sliders with inputs
+    ['age', 'height', 'weight'].forEach(id => {
+        const input = document.getElementById(id);
+        const slider = document.getElementById(id + 'Slider');
+        input.addEventListener('input', () => {
+            if (slider.min <= input.value && input.value <= slider.max) {
+                slider.value = input.value;
+            }
+        });
+    });
+
+    let selectedGender = 'male';
+
+    function selectGender(el, gender) {
+        document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        selectedGender = gender;
+    }
+
+    function calculateBMI() {
+        const age = parseInt(document.getElementById('age').value);
+        const height = parseFloat(document.getElementById('height').value);
+        const weight = parseFloat(document.getElementById('weight').value);
+
+        if (!age || !height || !weight) {
+            shakeButton();
+            return;
+        }
+
+        const heightM = height / 100;
+        const bmi = weight / (heightM * heightM);
+        const bmiRounded = bmi.toFixed(1);
+
+        // Display BMI
+        animateNumber('bmiNumber', bmiRounded);
+
+        // Status
+        let status, statusIcon, statusColor, statusBg, cat;
+        if (bmi < 18.5) {
+            status = 'น้ำหนักน้อยกว่าเกณฑ์'; statusIcon = '🍃'; statusColor = '#2980b9'; statusBg = '#ebf5fb'; cat = 'underweight';
+        } else if (bmi < 23) {
+            status = 'น้ำหนักปกติ สมส่วน'; statusIcon = '✅'; statusColor = '#1a7a5a'; statusBg = '#eafaf1'; cat = 'normal';
+        } else if (bmi < 25) {
+            status = 'น้ำหนักเกินเกณฑ์'; statusIcon = '⚠️'; statusColor = '#b7950b'; statusBg = '#fef9e7'; cat = 'overweight';
+        } else if (bmi < 30) {
+            status = 'อ้วนระดับ 1'; statusIcon = '🟠'; statusColor = '#ca6f1e'; statusBg = '#fdf2e9'; cat = 'obese1';
+        } else {
+            status = 'อ้วนระดับ 2'; statusIcon = '🔴'; statusColor = '#c0392b'; statusBg = '#fdedec'; cat = 'obese2';
+        }
+
+        const statusEl = document.getElementById('bmiStatus');
+        statusEl.innerHTML = `<span class="status-icon">${statusIcon}</span>${status}`;
+        statusEl.style.color = statusColor;
+        statusEl.style.background = statusBg;
+        statusEl.style.border = `2px solid ${statusColor}20`;
+
+        // Gauge pointer
+        let gaugePercent;
+        if (bmi < 15) gaugePercent = 0;
+        else if (bmi > 40) gaugePercent = 100;
+        else gaugePercent = ((bmi - 15) / 25) * 100;
+        setTimeout(() => {
+            document.getElementById('gaugePointer').style.left = gaugePercent + '%';
+        }, 100);
+
+        // Ideal weight (BMI 21)
+        const idealMin = (18.5 * heightM * heightM).toFixed(1);
+        const idealMax = (22.9 * heightM * heightM).toFixed(1);
+        document.getElementById('idealWeight').textContent = `${idealMin}-${idealMax} กก.`;
+
+        const idealMid = (21 * heightM * heightM);
+        const diff = weight - idealMid;
+        const diffEl = document.getElementById('weightDiff');
+        if (Math.abs(diff) < 1) {
+            diffEl.textContent = 'สมส่วน 👌';
+            diffEl.style.color = '#2ecc71';
+        } else if (diff > 0) {
+            diffEl.textContent = `เกิน ${diff.toFixed(1)} กก.`;
+            diffEl.style.color = '#e67e22';
+        } else {
+            diffEl.textContent = `ขาด ${Math.abs(diff).toFixed(1)} กก.`;
+            diffEl.style.color = '#3498db';
+        }
+
+        // BMR (Mifflin-St Jeor)
+        let bmr;
+        if (selectedGender === 'male') {
+            bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+        } else {
+            bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+        }
+        document.getElementById('bmrValue').textContent = Math.round(bmr).toLocaleString();
+
+        // Water intake
+        const water = (weight * 0.033).toFixed(1);
+        document.getElementById('waterIntake').textContent = `${water} ลิตร`;
+
+        // Highlight table row
+        document.querySelectorAll('.bmi-table-row').forEach(row => {
+            row.classList.remove('active-row');
+            if (row.dataset.cat === cat) row.classList.add('active-row');
+        });
+
+        // Health tips
+        const tips = {
+            underweight: {
+                title: '💡 คำแนะนำสำหรับคุณ',
+                text: 'ควรเพิ่มปริมาณอาหารที่มีคุณค่าทางโภชนาการ เช่น โปรตีน ธัญพืช ถั่ว ผลไม้ และออกกำลังกายแบบเสริมสร้างกล้ามเนื้อ เพื่อเพิ่มน้ำหนักอย่างสุขภาพดี'
+            },
+            normal: {
+                title: '🎉 ยอดเยี่ยม!',
+                text: 'น้ำหนักของคุณอยู่ในเกณฑ์สมส่วน รักษาสุขภาพดีๆ แบบนี้ต่อไปนะคะ ออกกำลังกายสม่ำเสมอ ทานอาหารครบ 5 หมู่ และนอนหลับพักผ่อนให้เพียงพอ'
+            },
+            overweight: {
+                title: '💡 คำแนะนำสำหรับคุณ',
+                text: 'ลองปรับพฤติกรรมการกินเล็กน้อย ลดของหวาน ของทอด เน้นผัก ผลไม้ โปรตีน และออกกำลังกายอย่างน้อยวันละ 30 นาที จะช่วยให้น้ำหนักกลับมาสมส่วนได้'
+            },
+            obese1: {
+                title: '💡 คำแนะนำสำหรับคุณ',
+                text: 'ควรปรึกษาแพทย์หรือนักโภชนาการเพื่อวางแผนลดน้ำหนักอย่างเหมาะสม เน้นควบคุมอาหารและออกกำลังกายอย่างสม่ำเสมอ เริ่มจากการเดินวันละ 30 นาทีก็ดีมากแล้ว'
+            },
+            obese2: {
+                title: '⚕️ คำแนะนำสำหรับคุณ',
+                text: 'แนะนำให้พบแพทย์เพื่อตรวจสุขภาพและรับคำปรึกษาในการลดน้ำหนักอย่างปลอดภัย อย่าเพิ่งลดน้ำหนักด้วยตัวเองอย่างรวดเร็ว ค่อยๆ ปรับทีละนิดจะยั่งยืนกว่า'
+            }
+        };
+
+        const tip = tips[cat];
+        document.getElementById('healthTip').innerHTML = `<div class="tip-title">${tip.title}</div>${tip.text}`;
+
+        // Show result
+        const resultSection = document.getElementById('resultSection');
+        resultSection.classList.add('show');
+        resultSection.style.display = 'block';
+        setTimeout(() => resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+    }
+
+    function animateNumber(id, target) {
+        const el = document.getElementById(id);
+        const targetNum = parseFloat(target);
+        let current = 0;
+        const step = targetNum / 30;
+        const interval = setInterval(() => {
+            current += step;
+            if (current >= targetNum) {
+                el.textContent = target;
+                clearInterval(interval);
+            } else {
+                el.textContent = current.toFixed(1);
+            }
+        }, 20);
+    }
+
+    function shakeButton() {
+        const btn = document.querySelector('.calc-btn');
+        btn.style.animation = 'shake 0.4s ease';
+        setTimeout(() => btn.style.animation = '', 400);
+    }
+
+    function resetForm() {
+        document.getElementById('age').value = '';
+        document.getElementById('height').value = '';
+        document.getElementById('weight').value = '';
+        document.getElementById('ageSlider').value = 25;
+        document.getElementById('heightSlider').value = 170;
+        document.getElementById('weightSlider').value = 65;
+        document.getElementById('resultSection').classList.remove('show');
+        document.getElementById('resultSection').style.display = 'none';
+        document.getElementById('gaugePointer').style.left = '0%';
+        document.querySelectorAll('.bmi-table-row').forEach(r => r.classList.remove('active-row'));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Enter key
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Enter') calculateBMI();
+    });
+</script>
+
+</body>
+</html>
